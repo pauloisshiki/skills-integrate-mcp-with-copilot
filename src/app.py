@@ -78,6 +78,30 @@ activities = {
 }
 
 
+# New endpoint: Create a new activity
+from pydantic import BaseModel
+
+class ActivityCreate(BaseModel):
+    name: str
+    description: str
+    schedule: str
+    max_participants: int
+
+
+@app.post("/activities/create")
+def create_activity(activity: ActivityCreate):
+    """Create a new activity"""
+    if activity.name in activities:
+        raise HTTPException(status_code=400, detail="Activity already exists")
+    activities[activity.name] = {
+        "description": activity.description,
+        "schedule": activity.schedule,
+        "max_participants": activity.max_participants,
+        "participants": []
+    }
+    return {"message": f"Activity '{activity.name}' created successfully"}
+
+
 @app.get("/")
 def root():
     return RedirectResponse(url="/static/index.html")
